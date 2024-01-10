@@ -1,6 +1,6 @@
 import streamlit as st
-import openai
-import langchain
+# import openai
+# import langchain
 from dotenv import load_dotenv
 import os
 from langchain_community.document_loaders import PyPDFLoader
@@ -8,6 +8,7 @@ from PyPDF2 import PdfReader
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
 from langchain_openai import OpenAI
+from langchain_openai import ChatOpenAI
 
 
 def main():
@@ -28,7 +29,7 @@ def main():
     noq = st.selectbox(
         "Number of questions for your quiz:",
         key='number_of_questions',
-        options=["5", "10", "15", "20", "25", "30"]
+        options=[5, 10, 15, 20, 25, 30]
     )
     
     pdf = st.file_uploader("Upload your PDF", type="pdf")
@@ -50,16 +51,15 @@ def main():
         api_key = os.getenv("OPENAI_API_KEY")
         llm = OpenAI(openai_api_key=api_key)
         
-        prompt_template = PromptTemplate.from_template(
-            '''Provide {noq} questions and answers for each questions from this text: 
-            {pdf_file}'''
-        )
-        
-        quiz_prompt = prompt_template.format(noq=noq, pdf_file=pdf_text)
-        llm_chain = LLMChain(prompt=quiz_prompt, llm=llm)
-        questions = llm_chain.run()
-        st.write(questions)
-    
+        for i in range(noq):
+            prompt_template = PromptTemplate.from_template(
+                '''Provide a multiple-choice question and the answer from this text: 
+                {pdf_file}'''
+            )
+            quiz_prompt = prompt_template.format(noq=noq, pdf_file=pdf_text)
+            st.write(llm(quiz_prompt))
+            i += 1
+
 
 
 if __name__ == '__main__':
