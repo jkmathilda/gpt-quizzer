@@ -1,6 +1,4 @@
 import streamlit as st
-# import openai
-# import langchain
 from dotenv import load_dotenv
 import os
 from langchain_community.document_loaders import PyPDFLoader
@@ -56,8 +54,8 @@ def main():
                 '''Provide a multiple-choice question and the answer from this text: 
                 {pdf_file}'''
             )
-            quiz_prompt = prompt_template.format(noq=noq, pdf_file=pdf_text)
-            st.write(llm(quiz_prompt))
+            quiz = prompt_template.format(noq=noq, pdf_file=pdf_text)
+            st.write(str(i + 1) + ". " + llm(quiz))
             i += 1
 
 
