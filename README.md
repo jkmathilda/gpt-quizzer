@@ -52,4 +52,4 @@ To configure the application, there are a few properties that can be set the env
 
 # Example
 
-<img width="799" alt="Screenshot 2024-01-22 at 11 49 05 PM" src="https://github.com/jkmathilda/gpt-quizzer/assets/142202145/9b3ca933-b75b-4386-b73f-a051e0ca36e7"><img width="835" alt="Screenshot 2024-01-22 at 11 48 46 PM" src="https://github.com/jkmathilda/gpt-quizzer/assets/142202145/043ed1c7-7b4a-43d1-a8cc-f83bbb0e03a4">
+![IMG_4861](https://github.com/jkmathilda/gpt-quizzer/assets/142202145/835bd134-d8ea-4fe6-ad09-3ccdee6f712e)
