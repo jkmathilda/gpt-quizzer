@@ -1,28 +1,28 @@
 import streamlit as st
-from dotenv import load_dotenv
 import os
-from langchain_community.document_loaders import PyPDFLoader
+from dotenv import load_dotenv
+import pandas as pd
+from langchain_openai import OpenAI
 from PyPDF2 import PdfReader
 from langchain.prompts import PromptTemplate
-from langchain.chains import LLMChain
-from langchain_openai import OpenAI
-from langchain_openai import ChatOpenAI
-import time
-
-
 
 def initialize():
     if 'q' not in st.session_state:
         st.session_state.q = []
-    
-    
-def quizzer(pdf_text):
+
+def quizzer(pdf_text, loq):
     api_key = os.getenv("OPENAI_API_KEY")
     llm = OpenAI(openai_api_key=api_key)
     
+    prev_questions = ""
+    
+    for i in enumerate(loq):
+        prev_questions += str(i) + ", "
+    
     prompt_template = PromptTemplate.from_template(
-        '''Provide a multiple-choice question with only ONE correct answer and the answer from this text: 
-        {pdf_file}
+        '''{pdf_file}
+        Provide a multiple-choice question with only ONE correct answer and the answer from the text above. However, questions 
+        MUST DIFFER from these: {prev_questions}. That is, questions shouldn't ask the same thing as those questions. 
         
         Follow this template:
             Question: (Question)
@@ -42,61 +42,30 @@ def quizzer(pdf_text):
         
         '''
     )
-    quiz = prompt_template.format(pdf_file=pdf_text)
+    quiz = prompt_template.format(pdf_file=pdf_text, prev_questions=prev_questions)
     
     return llm(quiz)
 
 
-def quizzing(i, noq, pdf_text, time_limit):
+def quizzing(pdf_text, loq): # Takes care of a single question
     
-    global corrects
+    mcq = quizzer(pdf_text, loq)
+    quiz = mcq.split('?')
     
-    # list of questions
-    # for k in range(noq):
-    #     st.session_state.loq.append(quizzer(pdf_text))
-    
-    # Only print out question portion
-    # q = quizzer(pdf_text)
-    st.session_state.q.append(quizzer(pdf_text))
-    question = st.session_state.q[i].split('?')
-    
-    st.subheader('Question ' + str(i + 1))
-        
-    st.write (question[0][10:] + '?')
+    question = quiz[0][10:] + "?"
     
     # Only print out multiple choice portion
     # [:-1] is used to omit 'A', 'B', 'C', 'D' in the end of each string
-    mc = question[1].split('.')
-
+    mc = quiz[1].split('.')
     
-    mc_choice = st.radio(
-        "multiple choice",
-        label_visibility="collapsed",
-        options=(mc[1][:-1], mc[2][:-1], mc[3][:-1], mc[4][:-1]),
-        index=None, 
-    )
+    mco = f'''A. {mc[1][:-1]} \nB.{mc[2][:-1]} \nC.{mc[3][:-1]} \nD.{mc[4][:-1]}'''
     
     # Correct answer
-    correct_ans = mc[5]
+    correct_ans = mc[4][-1] + "." + mc[5]
     
+    return question, mco, correct_ans
 
-    if mc_choice is not None:
-        if str(correct_ans).strip() == str(mc_choice).strip():
-            st.info(f"Correct 🟢 You selected '{mc_choice}'")
-            corrects += 1
-        else: 
-            st.info(f"You selected '{mc_choice}'")
-            st.error(f"Incorrect 🔴 Correct answer is '{correct_ans}'. ")
-            
-    # else: 
-        
-        # progress_bar = st.progress(0, text="Time is passing ...")
-        # for t in range(time_limit):
-        #     time.sleep(1)
-        #     progress_bar.progress(100//time_limit * t, text="Time is passing ...")
 
-        # progress_bar.empty()
-        # st.error(f"Out of time! 🔴 Correct answer is '{correct_ans}'. ")
 
 
 def main():
@@ -113,32 +82,24 @@ def main():
         page_icon="❔" 
     )
     
-    st.header('Quizzer❔')
+    st.header("Quizzer ❔")
+    st.write('Quiz Generating App')
     
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        noq = st.selectbox(
+    noq = st.selectbox(
             "Number of questions for your quiz:",
             key='number_of_questions',
             options=[5, 10, 15, 20, 25, 30]
         )
-    with col2:
-        time_limit = st.selectbox(
-            "Time limit (in seconds) for each question",
-            key='time_limit',
-            options=[15, 30, 45, 60, 75, 90, 105, 120]
-        )
     
     pdf = st.file_uploader("Upload your PDF", type="pdf")
     cancel_button = st.button('Cancel')
-    
+
     
     if cancel_button:
         st.stop()
         
-    global corrects
-    corrects = 0
+    # List Of Questions, List of Multiple Choice Options, List of Correct Answers, List Of Index
+    loq, lmco, lca, loi = [], [], [], []
         
     if pdf is not None:
         st.empty()
@@ -146,16 +107,24 @@ def main():
         pdf_text = ""                       # Initialize a string to accumulate extracted text
         for page in pdf_reader.pages:       # Loop through each page in the PDF
             pdf_text += page.extract_text()
-        
-        j = 0
-
-        while j < noq:
-            quizzing(j, noq, pdf_text, time_limit)
-            j += 1
-                
-        st.subheader(f"Quiz Finished! Your score is {str(corrects)} / {noq}. ")
-
-
+            
+        for i in range(noq):
+            question, mco, correct_ans = quizzing(pdf_text, loq)
+            i += 1
+            loq.append(question)
+            lmco.append(mco)
+            lca.append(correct_ans)
+            loi.append(i)
+            
+    quizzes = {
+        "Question": loq,
+        "Multiple Choice Options": lmco,
+        "Correct Answer": lca
+    }
+    
+    quizchart = pd.DataFrame(quizzes, index = loi) # loi: list of i + 1
+    
+    st.dataframe(quizchart)
 
 
 if __name__ == '__main__':
