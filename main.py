@@ -21,9 +21,9 @@ def quizzer(pdf_text, loq, difficulty):
     
     prompt_template = PromptTemplate.from_template(
         '''{pdf_file}
-        Provide a multiple-choice question with only ONE correct answer for {level} quiz solver and the answer from the text 
-        above. However, questions MUST DIFFER from these: {prev_questions}. That is, questions shouldn't ask the same thing 
-        as those questions. 
+        Provide a multiple-choice question with only ONE correct answer for {level} quiz solver (choose the vocabularies 
+        accordingly) and the answer from the text above. However, questions MUST DIFFER from these questions: {prev_questions}. 
+        That is, questions shouldn't ask the same thing as those questions. 
         
         Follow this template:
             Question: (Question)
@@ -95,7 +95,7 @@ def main():
     difficulty = st.selectbox(
         "Difficulty level of your quiz:",
         key='difficulty',
-        options=['Kindergartener', 'Elementary School', 'Secondary School', 'University Knowledgeable']
+        options=['Kindergartener', 'Elementary School', 'Secondary School', 'University / Knowledgeable']
     )
     
     pdf = st.file_uploader("Upload your PDF", type="pdf")
