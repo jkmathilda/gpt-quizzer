@@ -10,7 +10,7 @@ def initialize():
     if 'q' not in st.session_state:
         st.session_state.q = []
 
-def quizzer(pdf_text, loq):
+def quizzer(pdf_text, loq, difficulty):
     api_key = os.getenv("OPENAI_API_KEY")
     llm = OpenAI(openai_api_key=api_key)
     
@@ -21,8 +21,9 @@ def quizzer(pdf_text, loq):
     
     prompt_template = PromptTemplate.from_template(
         '''{pdf_file}
-        Provide a multiple-choice question with only ONE correct answer and the answer from the text above. However, questions 
-        MUST DIFFER from these: {prev_questions}. That is, questions shouldn't ask the same thing as those questions. 
+        Provide a multiple-choice question with only ONE correct answer for {level} quiz solver and the answer from the text 
+        above. However, questions MUST DIFFER from these: {prev_questions}. That is, questions shouldn't ask the same thing 
+        as those questions. 
         
         Follow this template:
             Question: (Question)
@@ -42,14 +43,14 @@ def quizzer(pdf_text, loq):
         
         '''
     )
-    quiz = prompt_template.format(pdf_file=pdf_text, prev_questions=prev_questions)
+    quiz = prompt_template.format(pdf_file=pdf_text, prev_questions=prev_questions, level=difficulty)
     
     return llm(quiz)
 
 
-def quizzing(pdf_text, loq): # Takes care of a single question
+def quizzing(pdf_text, loq, difficulty): # Takes care of a single question
     
-    mcq = quizzer(pdf_text, loq)
+    mcq = quizzer(pdf_text, loq, difficulty)
     quiz = mcq.split('?')
     
     question = quiz[0][10:] + "?"
@@ -91,6 +92,12 @@ def main():
             options=[5, 10, 15, 20, 25, 30]
         )
     
+    difficulty = st.selectbox(
+        "Difficulty level of your quiz:",
+        key='difficulty',
+        options=['Kindergartener', 'Elementary School', 'Secondary School', 'University Knowledgeable']
+    )
+    
     pdf = st.file_uploader("Upload your PDF", type="pdf")
     cancel_button = st.button('Cancel')
 
@@ -109,7 +116,7 @@ def main():
             pdf_text += page.extract_text()
             
         for i in range(noq):
-            question, mco, correct_ans = quizzing(pdf_text, loq)
+            question, mco, correct_ans = quizzing(pdf_text, loq, difficulty)
             i += 1
             loq.append(question)
             lmco.append(mco)
