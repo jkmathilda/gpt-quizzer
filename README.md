@@ -52,6 +52,4 @@ To configure the application, there are a few properties that can be set the env
 
 # Example
 
-<img width="1710" alt="Screenshot 2024-01-22 at 11 29 15 PM" src="https://github.com/jkmathilda/gpt-Chatbot/assets/142202145/d380faa0-687b-4411-9cfe-fc834be25994">
-
-<img width="1710" alt="Screenshot 2024-01-22 at 11 37 48 PM" src="https://github.com/jkmathilda/gpt-quizzer/assets/142202145/f7a2be48-b69a-475f-bae9-07934003a95a">
+<img width="799" alt="Screenshot 2024-01-22 at 11 49 05 PM" src="https://github.com/jkmathilda/gpt-quizzer/assets/142202145/9b3ca933-b75b-4386-b73f-a051e0ca36e7"><img width="835" alt="Screenshot 2024-01-22 at 11 48 46 PM" src="https://github.com/jkmathilda/gpt-quizzer/assets/142202145/043ed1c7-7b4a-43d1-a8cc-f83bbb0e03a4">
