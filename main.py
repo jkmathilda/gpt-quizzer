@@ -80,7 +80,8 @@ def main():
     # page style
     st.set_page_config(
         page_title="Quizzer❔",
-        page_icon="❔" 
+        page_icon="❔",
+        layout="wide"
     )
     
     st.header("Quizzer ❔")
